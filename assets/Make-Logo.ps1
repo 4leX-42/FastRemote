@@ -1,5 +1,5 @@
 # Draws the Quaygate logo (vector, 64-unit grid) and writes logo-<size>.png and Quaygate.ico next to this script.
-# Concept: a local screen sending an arrow to a remote one behind it, cut corners like the app buttons.
+# Concept: one monoline screen whose corner breaks out into a stroke, a "Q" and a jump to a remote machine.
 param([string]$Accent = '#C9A96E', [string]$Tile = '#141416', [string]$OutDir = $PSScriptRoot)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName PresentationCore, WindowsBase, PresentationFramework
@@ -13,29 +13,14 @@ function New-LogoVisual([int]$Size) {
     $dc.PushTransform((New-Object Windows.Media.ScaleTransform ($Size / 64), ($Size / 64)))
     $gold = Brush $Accent; $tile = Brush $Tile
     $small = $Size -le 24
-    # tile with two cut corners
-    $dc.DrawGeometry($tile, $null, (Geo 'M12,0 H64 V52 L52,64 H0 V12 Z'))
-    if (-not $small) {
-        $edge = New-Object Windows.Media.Pen ((Brush $Accent 0.35)), 1.2
-        $dc.DrawGeometry($null, $edge, (Geo 'M12.6,0.6 H63.4 V51.8 L51.8,63.4 H0.6 V12.6 Z'))
-    }
-    # back screen (the remote one), dimmed outline partly behind the front screen
-    $back = New-Object Windows.Media.Pen ((Brush $Accent 0.5)), $(if ($small) { 4.5 } else { 3.2 })
-    $back.LineJoin = 'Miter'
-    $dc.DrawGeometry($null, $back, (Geo 'M30,10.5 H54 V32 H45'))
-    $dc.DrawGeometry($null, $back, (Geo 'M30,10.5 V18'))
-    # front screen: gold frame with a cut corner, dark display
-    $dc.DrawGeometry($gold, $null, (Geo 'M15,19 H45 V45 H9 V25 Z'))
-    $dc.DrawGeometry($tile, $null, (Geo 'M16.8,23 H41 V41 H13 V26.8 Z'))
-    # arrow from the display towards the remote screen
-    $w = if ($small) { 4.2 } else { 3.2 }
-    $pen = New-Object Windows.Media.Pen $gold, $w
-    $pen.StartLineCap = 'Flat'; $pen.EndLineCap = 'Flat'
-    $dc.DrawGeometry($null, $pen, (Geo 'M18.5,36.5 L31,27'))
-    $dc.DrawGeometry($gold, $null, (Geo 'M35.5,23.5 L34.2,33 L25.6,24.8 Z'))
-    # stand
-    $dc.DrawGeometry($gold, $null, (Geo 'M24,45 H30 V49.5 H24 Z'))
-    $dc.DrawGeometry($gold, $null, (Geo 'M17,49.5 H37 V52.5 H17 Z'))
+    # rounded charcoal tile, no frame
+    $dc.DrawGeometry($tile, $null, (Geo 'M14,0 H50 A14,14 0 0 1 64,14 V50 A14,14 0 0 1 50,64 H14 A14,14 0 0 1 0,50 V14 A14,14 0 0 1 14,0 Z'))
+    # monoline mark: a screen whose corner turns into an exit stroke (a "Q" and a remote jump)
+    $t = if ($small) { 7 } else { 5.5 }
+    $pen = New-Object Windows.Media.Pen $gold, $t
+    $pen.StartLineCap = 'Round'; $pen.EndLineCap = 'Round'; $pen.LineJoin = 'Round'
+    $dc.DrawGeometry($null, $pen, (Geo 'M41,45 H21 A6,6 0 0 1 15,39 V21 A6,6 0 0 1 21,15 H43 A6,6 0 0 1 49,21 V37'))
+    $dc.DrawGeometry($null, $pen, (Geo 'M36,36 L50,50'))
     $dc.Pop(); $dc.Close()
     $dv
 }

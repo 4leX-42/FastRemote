@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -30,8 +31,8 @@ namespace Quaygate
         bool updating,ready,closed;
         int searchVersion;
         CancellationTokenSource filter;
-        Point dragPoint;
-        SiteItem dragSite;
+        readonly System.Windows.Threading.DispatcherTimer typing;
+        Connection[] shown=new Connection[0];
         Connection selected;
         string selectedEndpoint;
         string SiteKey => (Sites.SelectedItem as SiteItem)?.Key;
@@ -41,8 +42,13 @@ namespace Quaygate
         {
             store=data; Config=settings; rows=list; isolated=smoke || Program.Offscreen;
             InitializeComponent();
+            // With thousands of rows, search waits for a short pause in typing.
+            typing=new System.Windows.Threading.DispatcherTimer{Interval=TimeSpan.FromMilliseconds(90)};
+            typing.Tick+=(s,e)=>{ typing.Stop(); Filter(selected?.Id); };
+            Reorder.Attach(Sites,i=>Sites.Items[i] is SiteItem item && item.Key!=null,
+                (a,b)=>((ObservableCollection<SiteItem>)Sites.ItemsSource).Move(a,b),SaveSiteOrder);
             Appearance.Scale(this,Frame,Config.Scale);
-            WindowChrome.GetWindowChrome(this).CaptionHeight=48*Config.Scale;
+            WindowChrome.GetWindowChrome(this).CaptionHeight=40*Config.Scale;
             Placement.Set(this,Config);
             ready=true;
             Rebuild(null,null);
@@ -90,8 +96,8 @@ namespace Quaygate
                 var counts=rows.GroupBy(c=>c.Site).ToDictionary(g=>g.Key,g=>g.Count());
                 var entries=Config.Sites(rows).Select(k=>new SiteItem{Key=k,Label=SiteLabel(k),Count=counts[k]}).ToList();
                 entries.Add(new SiteItem{Label=T("All"),Count=rows.Count});
-                Sites.ItemsSource=entries;
-                Sites.SelectedItem=entries.FirstOrDefault(s=>s.Key==site) ?? entries.Last();
+                Sites.ItemsSource=new ObservableCollection<SiteItem>(entries);
+                Sites.SelectedItem=((ObservableCollection<SiteItem>)Sites.ItemsSource).FirstOrDefault(s=>s.Key==site) ?? ((ObservableCollection<SiteItem>)Sites.ItemsSource).Last();
                 List.ContextMenu=Menu("Connect","Console","Full","Cred","RemoveCred","Copy","Edit","Duplicate","Delete");
                 Sites.ContextMenu=Menu("Rename","SiteOptions");
             }
@@ -112,7 +118,10 @@ namespace Quaygate
         void SearchChanged(object sender,TextChangedEventArgs e)
         {
             if (!ready || updating) return;
-            Filter(selected?.Id);
+            SearchHint.Visibility=Search.Text.Length==0 ? Visibility.Visible : Visibility.Collapsed;
+            typing.Stop();
+            // small lists filter on the keystroke itself; big ones wait for a pause in typing
+            if (rows.Count<1000) Filter(selected?.Id); else typing.Start();
         }
         void SiteChanged(object sender,SelectionChangedEventArgs e) { if (ready && !updating) Filter(selected?.Id); }
         async void Filter(string prefer)
@@ -139,8 +148,10 @@ namespace Quaygate
             updating=true;
             try
             {
-                List.ItemsSource=visible;
-                List.SelectedItem=visible.FirstOrDefault(c=>c.Id==prefer) ?? visible.FirstOrDefault();
+                // Same rows as before: keep the list (and its scroll and selection) untouched.
+                if (!visible.SequenceEqual(shown)) { List.ItemsSource=visible; shown=visible; }
+                var want=visible.FirstOrDefault(c=>c.Id==prefer) ?? visible.FirstOrDefault();
+                if (!ReferenceEquals(List.SelectedItem,want)) List.SelectedItem=want;
             }
             finally { updating=false; }
             Count.Text=visible.Length==rows.Count ? T("Count",visible.Length) : T("Filtered",visible.Length,rows.Count);
@@ -191,29 +202,12 @@ namespace Quaygate
             var list=(ListBox)sender;
             if (ItemsControl.ContainerFromElement(list,e.OriginalSource as DependencyObject) is ListBoxItem item) item.IsSelected=true;
         }
-        void DragStart(object sender,MouseButtonEventArgs e)
+        void SaveSiteOrder()
         {
-            dragPoint=e.GetPosition(Sites);
-            dragSite=(ItemsControl.ContainerFromElement(Sites,e.OriginalSource as DependencyObject) as ListBoxItem)?.DataContext as SiteItem;
-        }
-        void DragMoveSite(object sender,MouseEventArgs e)
-        {
-            if (dragSite?.Key==null || e.LeftButton!=MouseButtonState.Pressed) return;
-            var delta=e.GetPosition(Sites)-dragPoint;
-            if (Math.Abs(delta.Y)<SystemParameters.MinimumVerticalDragDistance && Math.Abs(delta.X)<SystemParameters.MinimumHorizontalDragDistance) return;
-            var site=dragSite; dragSite=null;
-            DragDrop.DoDragDrop(Sites,site,DragDropEffects.Move);
-        }
-        void DropSite(object sender,DragEventArgs e)
-        {
-            var from=e.Data.GetData(typeof(SiteItem)) as SiteItem;
-            var to=(ItemsControl.ContainerFromElement(Sites,e.OriginalSource as DependencyObject) as ListBoxItem)?.DataContext as SiteItem;
-            if (from?.Key==null || to==null || to==from) return;
-            var order=Config.Sites(rows);
-            int at=to.Key==null ? order.Count-1 : order.IndexOf(to.Key);
-            order.Remove(from.Key); order.Insert(at,from.Key);
+            var order=((ObservableCollection<SiteItem>)Sites.ItemsSource).Where(x=>x.Key!=null).Select(x=>x.Key).ToList();
             var next=Store.Clone(Config); next.SiteOrder=order;
-            store.Save("settings.json",next); Config=next; Rebuild(from.Key,selected?.Id);
+            try { store.Save("settings.json",next); Config=next; }
+            catch(Exception ex) { Record(ex); }
         }
         void RowDoubleClick(object sender,MouseButtonEventArgs e)
         {

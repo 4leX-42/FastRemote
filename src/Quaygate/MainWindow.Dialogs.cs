@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Input;
 using static Quaygate.Words;
 
 namespace Quaygate
@@ -161,17 +162,23 @@ namespace Quaygate
             var language=dlg.Choices("Language",new[]{"auto","es","en"},next.Language ?? "auto",v=>T(v),"Language");
             dlg.Label("Order");
             var order=Config.Sites(rows);
-            var list=dlg.Add(new ListBox{Height=80},"SiteOrder");
-            void ShowOrder(int at) { list.ItemsSource=order.Select(SiteLabel).ToArray(); list.SelectedIndex=at; }
-            ShowOrder(order.Count>0 ? 0 : -1);
-            void Move(int direction)
+            var labels=new System.Collections.ObjectModel.ObservableCollection<string>(order.Select(SiteLabel));
+            var list=dlg.Add(new ListBox{MaxHeight=180,ItemsSource=labels,ToolTip=T("DragHint")},"SiteOrder");
+            void MoveSite(int from,int to)
             {
-                int index=list.SelectedIndex, dest=index+direction;
-                if (index<0 || dest<0 || dest>=order.Count) return;
-                var value=order[index]; order.RemoveAt(index); order.Insert(dest,value); ShowOrder(dest);
+                if (from<0 || to<0 || from>=order.Count || to>=order.Count || from==to) return;
+                var value=order[from]; order.RemoveAt(from); order.Insert(to,value); labels.Move(from,to);
             }
-            var buttons=dlg.Add(new WrapPanel());
-            dlg.Button("Up","MoveUp",()=>Move(-1),buttons); dlg.Button("Down","MoveDown",()=>Move(1),buttons);
+            Reorder.Attach(list,i=>true,MoveSite,()=>{});
+            // Keyboard: Alt+Up / Alt+Down move the selected site
+            list.PreviewKeyDown+=(s,e)=>{
+                if ((Keyboard.Modifiers&ModifierKeys.Alt)==0) return;
+                var key=e.Key==Key.System ? e.SystemKey : e.Key;
+                int at=list.SelectedIndex, to=key==Key.Up ? at-1 : key==Key.Down ? at+1 : -1;
+                if (at<0 || to<0 || to>=order.Count) return;
+                MoveSite(at,to); list.SelectedIndex=to; e.Handled=true;
+            };
+            dlg.Note(T("DragHint"),"SiteOrderHint");
             dlg.Button("Folder","OpenFolder",()=>{ if (!isolated) Process.Start(new ProcessStartInfo(store.Home){UseShellExecute=true}); });
             void Preview()
             {
@@ -193,6 +200,6 @@ namespace Quaygate
             Rebuild(SiteKey,selected?.Id);
             if (saved) Info.Text=T("Done");
         }
-        void WindowChromeUpdate() => System.Windows.Shell.WindowChrome.GetWindowChrome(this).CaptionHeight=48*Config.Scale;
+        void WindowChromeUpdate() => System.Windows.Shell.WindowChrome.GetWindowChrome(this).CaptionHeight=40*Config.Scale;
     }
 }
