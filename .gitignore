@@ -1,0 +1,12 @@
+# Build output (build.ps1)
+Quaygate.exe
+Quaygate.ico
+!assets/Quaygate.ico
+.work/
+TestResults/
+
+# mRemoteNG source used only as a feature reference (GPL), never copied
+_ref/
+bin/
+obj/
+dist/

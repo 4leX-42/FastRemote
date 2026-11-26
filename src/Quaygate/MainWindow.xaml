@@ -1,0 +1,67 @@
+<Window x:Class="Quaygate.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Quaygate" Icon="/Quaygate;component/Logo.png" WindowStyle="None" WindowStartupLocation="Manual" MinHeight="390" MinWidth="720" PreviewKeyDown="Keys">
+ <WindowChrome.WindowChrome><WindowChrome CaptionHeight="48" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/></WindowChrome.WindowChrome>
+ <Border x:Name="Frame" BorderThickness="1" BorderBrush="{DynamicResource Line}" Background="{DynamicResource Base}">
+ <Grid><Grid.RowDefinitions><RowDefinition Height="52"/><RowDefinition Height="*"/><RowDefinition Height="31"/></Grid.RowDefinitions>
+ <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="14,0,4,0">
+ <DockPanel LastChildFill="True"><StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center" Margin="0,0,30,0">
+ <Image Source="/Quaygate;component/Logo.png" Width="32" Height="32"/><TextBlock Text="Quaygate" FontWeight="SemiBold" FontSize="21" Margin="9,0,0,0"/></StackPanel>
+ <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+ <Button x:Name="BtnSettings" Tag="Settings" Content="&#xE713;" Click="ActionClick" ToolTip="{DynamicResource LSettings}" AutomationProperties.Name="{DynamicResource LSettings}" Style="{StaticResource Chrome}"/>
+<Button x:Name="BtnMin" Tag="Minimize" Content="&#xE921;" Click="ActionClick" ToolTip="{DynamicResource LMinimize}" AutomationProperties.Name="{DynamicResource LMinimize}" Style="{StaticResource Chrome}"/>
+<Button x:Name="BtnMax" Tag="Maximize" Content="&#xE922;" Click="ActionClick" ToolTip="{DynamicResource LMaximize}" AutomationProperties.Name="{DynamicResource LMaximize}" Style="{StaticResource Chrome}"/>
+<Button x:Name="BtnClose" Tag="Close" Content="&#xE8BB;" Click="ActionClick" ToolTip="{DynamicResource LClose}" AutomationProperties.Name="{DynamicResource LClose}" Style="{StaticResource Chrome}"/>
+ </StackPanel>
+ <Grid MaxWidth="430" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,10,0" WindowChrome.IsHitTestVisibleInChrome="True">
+ <TextBox x:Name="Search" TextChanged="SearchChanged" AutomationProperties.Name="{DynamicResource LSearch}" Padding="32,6,8,6"/>
+ <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource Sub}" Margin="9,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+ <TextBlock x:Name="SearchHint" Text="{DynamicResource LSearch}" Foreground="{DynamicResource Sub}" Margin="32,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+ </Grid></DockPanel></Border>
+ <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="196"/><ColumnDefinition Width="*"/><ColumnDefinition Width="212"/></Grid.ColumnDefinitions>
+ <Border Background="{DynamicResource Surface}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,1,0" Padding="9,14,9,8">
+ <DockPanel><TextBlock DockPanel.Dock="Top" Text="{DynamicResource LSites}" FontSize="15" FontWeight="SemiBold" Margin="6,0,0,12"/>
+ <StackPanel DockPanel.Dock="Bottom">
+ <Button x:Name="BtnNew" Content="{DynamicResource LNew}" Tag="New" Click="ActionClick" Margin="0,4,0,0"/>
+<Button x:Name="BtnImport" Content="{DynamicResource LImport}" Tag="Import" Click="ActionClick" Margin="0,4,0,0"/>
+<Button x:Name="BtnBulk" Content="{DynamicResource LBulk}" Tag="Bulk" Click="ActionClick" Margin="0,4,0,0"/>
+ </StackPanel>
+ <ListBox x:Name="Sites" SelectionChanged="SiteChanged" PreviewMouseRightButtonDown="SelectUnderMouse" AllowDrop="True" PreviewMouseLeftButtonDown="DragStart" MouseMove="DragMoveSite" Drop="DropSite">
+ <ListBox.ItemTemplate><DataTemplate><DockPanel><TextBlock DockPanel.Dock="Right" Text="{Binding Count}" Foreground="{DynamicResource Sub}" Margin="6,0,0,0"/><TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis"/></DockPanel></DataTemplate></ListBox.ItemTemplate>
+ </ListBox></DockPanel></Border>
+ <DockPanel Grid.Column="1" Margin="13,14,12,6"><TextBlock DockPanel.Dock="Top" x:Name="ListTitle" FontSize="20" FontWeight="SemiBold" Margin="3,0,0,12"/>
+ <Border DockPanel.Dock="Top" Padding="11,5,8,7" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Line}">
+ <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="1.1*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="0.9*"/><ColumnDefinition Width="18"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource LName}" Foreground="{DynamicResource Sub}" Grid.Column="1" FontSize="12"/><TextBlock Text="{DynamicResource LHost}" Foreground="{DynamicResource Sub}" Grid.Column="2" FontSize="12"/><TextBlock Text="{DynamicResource LUser}" Foreground="{DynamicResource Sub}" Grid.Column="3" FontSize="12"/></Grid></Border>
+ <Grid><ListBox x:Name="List" SelectionChanged="RowChanged" PreviewMouseRightButtonDown="SelectUnderMouse" MouseDoubleClick="RowDoubleClick"
+ VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+ <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="1.1*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="0.9*"/><ColumnDefinition Width="18"/></Grid.ColumnDefinitions>
+ <Ellipse Width="7" Height="7" HorizontalAlignment="Left"><Ellipse.Style><Style TargetType="Ellipse"><Setter Property="Fill" Value="{DynamicResource Sub}"/><Style.Triggers>
+ <DataTrigger Binding="{Binding Status}" Value="Online"><Setter Property="Fill" Value="{DynamicResource Accent}"/></DataTrigger>
+ <DataTrigger Binding="{Binding Status}" Value="Offline"><Setter Property="Fill" Value="#E27171"/></DataTrigger></Style.Triggers></Style></Ellipse.Style></Ellipse>
+ <TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" Margin="0,0,5,0"/>
+ <TextBlock Grid.Column="2" Text="{Binding HostLabel}" TextTrimming="CharacterEllipsis" FontFamily="Cascadia Mono, Consolas" Margin="0,0,5,0"/>
+ <TextBlock Grid.Column="3" Text="{Binding Login}" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Sub}"/>
+ <TextBlock Grid.Column="4" Text="{Binding KeyIcon}" FontFamily="Segoe MDL2 Assets" Foreground="{DynamicResource Accent}"/>
+ </Grid></DataTemplate></ListBox.ItemTemplate></ListBox>
+ <TextBlock x:Name="EmptyList" TextAlignment="Center" TextWrapping="Wrap" Margin="12" VerticalAlignment="Center" Foreground="{DynamicResource Sub}"/></Grid></DockPanel>
+ <Border Grid.Column="2" BorderBrush="{DynamicResource Line}" BorderThickness="1,0,0,0" Background="{DynamicResource Surface}" Padding="13,15">
+ <Grid><TextBlock x:Name="NoSel" Text="{DynamicResource LSelect}" TextWrapping="Wrap" Foreground="{DynamicResource Sub}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+ <ScrollViewer x:Name="Details" VerticalScrollBarVisibility="Auto"><StackPanel>
+ <TextBlock x:Name="DSite" Foreground="{DynamicResource Accent}" FontWeight="SemiBold"/><TextBlock x:Name="DName" FontSize="21" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,3"/>
+ <TextBlock x:Name="DState" Foreground="{DynamicResource Sub}"/>
+ <TextBlock Text="{DynamicResource LHost}" Style="{StaticResource Caption}"/><TextBlock x:Name="DHost" TextWrapping="Wrap" FontFamily="Cascadia Mono, Consolas"/>
+<TextBlock Text="{DynamicResource LUser}" Style="{StaticResource Caption}"/><TextBlock x:Name="DUser" TextWrapping="Wrap" />
+<TextBlock Text="{DynamicResource LCred}" Style="{StaticResource Caption}"/><TextBlock x:Name="DCred" TextWrapping="Wrap" />
+<TextBlock Text="{DynamicResource LDescription}" Style="{StaticResource Caption}"/><TextBlock x:Name="DDescr" TextWrapping="Wrap" />
+ <Border Height="1" Background="{DynamicResource Line}" Margin="0,14,0,7"/>
+ <Button x:Name="BtnConnect" Content="{DynamicResource LConnect}" Tag="Connect" Click="ActionClick" Margin="0,4,0,0" Style="{StaticResource BtnGold}"/>
+<Button x:Name="BtnAdmin" Content="{DynamicResource LConsole}" Tag="Console" Click="ActionClick" Margin="0,4,0,0" />
+<Button x:Name="BtnFull" Content="{DynamicResource LFull}" Tag="Full" Click="ActionClick" Margin="0,4,0,0" />
+<Button x:Name="BtnCred" Content="{DynamicResource LCred}" Tag="Cred" Click="ActionClick" Margin="0,4,0,0" />
+<Button x:Name="BtnEdit" Content="{DynamicResource LEdit}" Tag="Edit" Click="ActionClick" Margin="0,4,0,0" />
+<Button x:Name="BtnDel" Content="{DynamicResource LDelete}" Tag="Delete" Click="ActionClick" Margin="0,4,0,0" />
+ </StackPanel></ScrollViewer></Grid></Border></Grid>
+ <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource Line}" Padding="15,0">
+ <DockPanel VerticalAlignment="Center"><TextBlock x:Name="Count" DockPanel.Dock="Right" Foreground="{DynamicResource Sub}"/>
+ <TextBlock x:Name="Info" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource Sub}"/></DockPanel></Border>
+ </Grid></Border>
+</Window>

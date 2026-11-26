@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <Version>1.0.0</Version>
+    <Company>Quaygate contributors</Company>
+    <Authors>Quaygate contributors</Authors>
+    <ApplicationIcon>../../assets/Quaygate.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <NuGetAudit>false</NuGetAudit>
+    <DebugType>embedded</DebugType>
+    <Deterministic>true</Deterministic>
+    <PathMap>$(MSBuildProjectDirectory)=Quaygate</PathMap>
+    <Copyright>Copyright (c) 2026 Quaygate contributors</Copyright>
+    <Product>Quaygate</Product>
+    <Description>Minimal Remote Desktop launcher</Description>
+    <StartupObject>Quaygate.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Resource Include="../../assets/logo-64.png" Link="Logo.png" />
+  </ItemGroup>
+</Project>
