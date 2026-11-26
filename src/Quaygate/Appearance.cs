@@ -40,15 +40,16 @@ Description|Descripción|Description
 Details|Detalles|Details
 Unknown|Sin comprobar|Unchecked
 Checking|Comprobando…|Checking…
-Online|Puerto accesible|Port reachable
+Online|En línea|Online
 Offline|Sin respuesta|No response
 Stored|Guardada|Stored
-NoCred|Sin credencial guardada|No stored credential
+NoCred|No guardada|Not stored
 Empty|Ninguna conexión coincide|No matching connections
 First|Añade tu primera conexión|Add your first connection
 Select|Selecciona una conexión|Select a connection
 Settings|Ajustes|Settings
 Scale|Tamaño de la interfaz|Interface size
+DragHint|Mantén pulsado y arrastra para cambiar el orden|Press, hold and drag to change the order
 Theme|Tema|Theme
 Carbon|Carbón y oro|Carbon gold
 Graphite|Grafito|Graphite
