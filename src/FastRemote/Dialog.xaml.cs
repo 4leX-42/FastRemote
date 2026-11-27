@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 
-namespace Quaygate
+namespace FastRemote
 {
     public partial class Dialog : Window
     {
@@ -13,10 +13,10 @@ namespace Quaygate
         public Dialog(MainWindow owner,string title)
         {
             InitializeComponent();
-            Owner=owner;
+            if (owner.IsVisible) Owner=owner;
             SetResourceReference(TitleProperty,"L"+title);
             Appearance.Scale(this,Frame,owner.Config.Scale);
-            Width=Math.Min(owner.ActualWidth,440*owner.Config.Scale);
+            Width=owner.ActualWidth>0 ? Math.Min(owner.ActualWidth,440*owner.Config.Scale) : 440*owner.Config.Scale;
             MaxHeight=Math.Max(300,owner.ActualHeight-24);
             if (Program.Offscreen)
             {
@@ -25,9 +25,14 @@ namespace Quaygate
                 ShowActivated=false;
             }
         }
+        // Text of the accept button: OK by default, Save in editors, Import in the importer.
+        public void AcceptText(string key) => DlgOk.SetResourceReference(ContentControl.ContentProperty,"LB"+key);
+        // Visual tests look at the dialog instead of showing it.
+        internal static Action<Dialog> Preview;
         public bool Run(Func<string> save=null)
         {
             commit=save;
+            if (Preview!=null) { Preview(this); Close(); return false; }
             return ShowDialog()==true;
         }
         void Accept(object sender,RoutedEventArgs e)

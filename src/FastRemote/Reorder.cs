@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Quaygate
+namespace FastRemote
 {
     // Press, hold and drag an item of a ListBox to move it; the row follows the pointer live and the
     // new order is reported once, when the button is released.

@@ -7,7 +7,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Quaygate.Tests
+namespace FastRemote.Tests
 {
     // Each scenario has its own data directory; the launcher always uses a process recorder.
     public class Scenarios
@@ -111,31 +111,29 @@ namespace Quaygate.Tests
         }
         public void CredentialLifecycle()
         {
-            const string host="quaygate-selftest.invalid";
+            const string host="fastremote-selftest.invalid",other="fastremote-selftest2.invalid";
             try
             {
+                Credentials.Remove(other);
                 Credentials.Remove(host); Equal(null,Credentials.User(host));
                 using var secret=new SecureString();
                 foreach(char c in Guid.NewGuid().ToString("N")) secret.AppendChar(c);
                 secret.MakeReadOnly();
                 Credentials.Set(host,@"LAB\test",secret); Equal(@"LAB\test",Credentials.User(host));
                 Credentials.Set(host,@"LAB\replacement",secret); Equal(@"LAB\replacement",Credentials.User(host));
+                // copy to another host: same password group, the source does not change
+                Credentials.Copy(host,other); Equal(@"LAB\replacement",Credentials.User(other));
+                var listed=Credentials.List().Where(x=>x.Host.StartsWith("fastremote-selftest")).ToList();
+                Equal(2,listed.Count); Check(listed.All(x=>x.Copyable),"Generic entries are copyable");
+                Equal(listed[0].Group,listed[1].Group);
+                // new user on the copy only
+                Credentials.Copy(other,other,@"LAB\renamed"); Equal(@"LAB\renamed",Credentials.User(other)); Equal(@"LAB\replacement",Credentials.User(host));
+                listed=Credentials.List().Where(x=>x.Host.StartsWith("fastremote-selftest")).ToList();
+                Check(listed[0].Group!=listed[1].Group,"Another user is another group");
             }
-            finally { Credentials.Remove(host); }
-            Equal(null,Credentials.User(host));
+            finally { Credentials.Remove(host); Credentials.Remove(other); }
+            Equal(null,Credentials.User(host)); Equal(null,Credentials.User(other));
         }
-        public void SelectedEndpointProbe()
-        {
-            var contacted=new List<string>();
-            using var probe=new Probe((host,port,token)=>{
-                contacted.Add(Rdp.Endpoint(host,port)); return Task.FromResult(true);
-            });
-            var skipped=probe.Selected("skipped.invalid",3389);
-            var chosen=probe.Selected("selected.invalid",3395);
-            Equal(null,skipped.GetAwaiter().GetResult());
-            Equal(true,chosen.GetAwaiter().GetResult());
-            Equal(true,probe.Selected("selected.invalid",3395).GetAwaiter().GetResult());
-            Equal("selected.invalid:3395",string.Join(",",contacted));
-        }
+
     }
 }

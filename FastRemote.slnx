@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/FastRemote/FastRemote.csproj" />
+  <Project Path="tests/FastRemote.Tests/FastRemote.Tests.csproj" />
+</Solution>

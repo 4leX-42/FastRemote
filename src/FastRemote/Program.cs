@@ -9,11 +9,11 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 
-namespace Quaygate
+namespace FastRemote
 {
     internal static class Program
     {
-        public static bool Offscreen => Environment.GetEnvironmentVariable("QUAYGATE_OFFSCREEN")=="1";
+        public static bool Offscreen => Environment.GetEnvironmentVariable("FASTREMOTE_OFFSCREEN")=="1";
         static string token;
         static uint message;
         delegate bool EnumProc(IntPtr hwnd,IntPtr data);
@@ -64,13 +64,24 @@ namespace Quaygate
         // First start after the rename: bring the connection list of the preview build (%APPDATA%\RdpDeck) once.
         static void MigratePreviewData()
         {
-            if (Environment.GetEnvironmentVariable("QUAYGATE_HOME")!=null) return;
+            if (Environment.GetEnvironmentVariable("FASTREMOTE_HOME")!=null) return;
             string appData=Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string oldList=Path.Combine(appData,"RdpDeck","connections.json");
-            string home=Path.Combine(appData,"Quaygate");
-            string newList=Path.Combine(home,"connections.json");
-            if (File.Exists(newList) || !File.Exists(oldList)) return;
-            try { Directory.CreateDirectory(home); File.Copy(oldList,newList); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+            string home=Path.Combine(appData,"FastRemote");
+            if (File.Exists(Path.Combine(home,"connections.json"))) return;
+            // newest previous name first; settings only exist in the C# builds
+            foreach (var old in new[]{"Quaygate","RdpDeck"})
+            {
+                string dir=Path.Combine(appData,old);
+                if (!File.Exists(Path.Combine(dir,"connections.json"))) continue;
+                try
+                {
+                    Directory.CreateDirectory(home);
+                    foreach (var name in new[]{"connections.json","settings.json"})
+                        if (File.Exists(Path.Combine(dir,name))) File.Copy(Path.Combine(dir,name),Path.Combine(home,name));
+                }
+                catch (IOException) { } catch (UnauthorizedAccessException) { }
+                return;
+            }
         }
         [STAThread]
         public static int Main(string[] args)
@@ -81,7 +92,7 @@ namespace Quaygate
                 MigratePreviewData();
                 store=new Store(Store.DefaultHome);
                 using var hash=SHA256.Create();
-                token="Quaygate."+BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(store.Home.TrimEnd('\\').ToUpperInvariant()))).Replace("-","");
+                token="FastRemote."+BitConverter.ToString(hash.ComputeHash(Encoding.UTF8.GetBytes(store.Home.TrimEnd('\\').ToUpperInvariant()))).Replace("-","");
                 bool smoke=args.Contains("--smoke");
                 using var mutex=new Mutex(true,@"Local\"+token,out var owns);
                 message=RegisterWindowMessage(token);
@@ -99,7 +110,7 @@ namespace Quaygate
                     var stdout=GetStdHandle(-11);
                     if ((stdout==IntPtr.Zero || stdout==new IntPtr(-1)) && AttachConsole(uint.MaxValue))
                         Console.SetOut(new StreamWriter(Console.OpenStandardOutput()){AutoFlush=true});
-                    Console.WriteLine("Quaygate smoke OK | connections="+rows.Count);
+                    Console.WriteLine("FastRemote smoke OK | connections="+rows.Count);
                     return 0;
                 }
                 Rdp.Clean(store.RdpDirectory);
@@ -107,7 +118,7 @@ namespace Quaygate
                 app.DispatcherUnhandledException+=(s,e)=>{ store.Log(e.Exception); main.ReportError(); e.Handled=true; };
                 return app.Run(main);
             }
-            catch(Exception ex) { store?.Log(ex); Console.Error.WriteLine("Quaygate: "+ex.GetType().Name); return 1; }
+            catch(Exception ex) { store?.Log(ex); Console.Error.WriteLine("FastRemote: "+ex.GetType().Name); return 1; }
         }
     }
 }

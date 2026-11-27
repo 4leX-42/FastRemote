@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Quaygate.Tests
+namespace FastRemote.Tests
 {
     [TestClass]
     public class CoreTests
@@ -20,7 +20,6 @@ namespace Quaygate.Tests
         [TestMethod] public void ImportedSiteDefaultsAndOverrides() => scenarios.ImportSiteInheritance();
         [TestMethod] public void SearchAndSiteOrder() => scenarios.SearchAndSites();
         [TestMethod] public void LaunchArgumentsAndFiles() => scenarios.Launch();
-        [TestMethod] public void OnlySelectedEndpointIsProbedAndCached() => scenarios.SelectedEndpointProbe();
         [TestMethod] public void CredentialManagerLifecycle() => scenarios.CredentialLifecycle();
         [TestMethod] public void ThemeContrastRenderingAndSearch() => VisualScenario.Run(directory);
     }

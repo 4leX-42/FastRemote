@@ -1,7 +1,7 @@
 # Build output (build.ps1)
-Quaygate.exe
-Quaygate.ico
-!assets/Quaygate.ico
+FastRemote.exe
+FastRemote.ico
+!assets/FastRemote.ico
 .work/
 TestResults/
 

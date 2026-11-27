@@ -4,19 +4,19 @@
     <TargetFramework>net48</TargetFramework>
     <UseWPF>true</UseWPF>
     <LangVersion>latest</LangVersion>
-    <Version>1.0.0</Version>
-    <Company>Quaygate contributors</Company>
-    <Authors>Quaygate contributors</Authors>
-    <ApplicationIcon>../../assets/Quaygate.ico</ApplicationIcon>
+    <Version>2.0.0</Version>
+    <Company>FastRemote contributors</Company>
+    <Authors>FastRemote contributors</Authors>
+    <ApplicationIcon>../../assets/FastRemote.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <NuGetAudit>false</NuGetAudit>
     <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
-    <PathMap>$(MSBuildProjectDirectory)=Quaygate</PathMap>
-    <Copyright>Copyright (c) 2026 Quaygate contributors</Copyright>
-    <Product>Quaygate</Product>
+    <PathMap>$(MSBuildProjectDirectory)=FastRemote</PathMap>
+    <Copyright>Copyright (c) 2026 FastRemote contributors</Copyright>
+    <Product>FastRemote</Product>
     <Description>Minimal Remote Desktop launcher</Description>
-    <StartupObject>Quaygate.Program</StartupObject>
+    <StartupObject>FastRemote.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Runtime.Serialization" />
