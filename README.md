@@ -1,59 +1,71 @@
-<p align="center"><img src="assets/logo-256.png" width="112" alt="Quaygate logo"></p>
+<p align="center"><img src="assets/logo-256.png" width="112" alt="FastRemote logo"></p>
 
-<h1 align="center">Quaygate</h1>
+<h1 align="center">FastRemote</h1>
 
-<p align="center">A fast, minimal Remote Desktop launcher for Windows. Your RDP connections in one clean window,
+<p align="center">A fast Remote Desktop launcher for Windows. Your RDP connections grouped by site in one window,
 each one opened in its own native <code>mstsc</code> window.</p>
 
-<p align="center"><img src="assets/screenshot.png" alt="Quaygate main window" width="860"></p>
+<p align="center"><img src="assets/screenshot.png" alt="FastRemote main window" width="860"></p>
 
 [Castellano](#castellano)
 
 ## Why
 
-mRemoteNG and similar tools embed every session in tabs. Quaygate does the opposite: it only organises and
-launches. Each connection opens in the real Remote Desktop client, with everything Windows already does well
-(multi-monitor, full screen, clipboard, smart sizing).
+mRemoteNG and similar tools embed every session in tabs. FastRemote only organises, checks and launches: each
+connection opens in the real Remote Desktop client, with everything Windows already does well (multi-monitor,
+full screen, clipboard, smart sizing).
 
 ## Features
 
-- **Sites sidebar** with counts, drag and drop to reorder, rename a site, "All" at the bottom.
-- **Instant search** by name, host, site, user or description (all words, accent-insensitive). Ctrl+F, arrows,
-  Enter to connect, Esc to clear.
+- **Desktop layout**: menu bar, toolbar, session tabs, sidebar, table grouped by site, details panel and a status bar.
+- **Sidebar**: favourites, all connections, active sessions, recent, unreachable, and the sites as a tree with
+  their servers. Sites are reordered by dragging (or Alt+arrows).
+- **Availability**: a TCP connection to the RDP port of every connection when the app starts and every 5 minutes,
+  one at a time and 250 ms apart, plus the selected connection every 60 seconds. No credentials are sent. It can
+  be turned off in *Settings > Availability*; some EDR products may report repeated connections to port 3389.
+- **Sessions from the real windows**: connecting, authenticating, connected or interrupted, read from the `mstsc`
+  windows. Each open session gets a tab with its duration; `mstsc` windows that were already open are picked up.
+  Connect on a server with an open session brings that window forward.
+- **Search** with Ctrl+K by name, host, site, user, tags or description (all words, accent-insensitive), and a
+  command palette with Ctrl+Shift+P.
+- **Credentials** stored where `mstsc` reads them (`TERMSRV/<host>` in Windows Credential Manager). In the
+  connection editor: the server's own credential, the same credential as another server (copied without turning
+  the password into text), or none. A tag shows when a credential is shared and the editor lists the other
+  connections it affects. Bulk credential for all, one site, or every connection with the same user. Passwords
+  are never written to disk by FastRemote.
 - **Import from mRemoteNG** (`confCons.xml`): RDP connections, folders, inheritance, and optionally the saved
-  passwords (AES-GCM, default or custom master password) copied to Windows Credential Manager.
-  Re-importing keeps your local names, folders and options.
-- **Credentials** stored where `mstsc` reads them (`TERMSRV/<host>` in Credential Manager), per connection or
-  for many at once (all, one site, or every connection with the same user). Passwords are never written to disk
-  by Quaygate.
+  passwords (AES-GCM, default or custom master password) copied to Credential Manager. Re-importing keeps your
+  local names, folders and options.
 - **Advanced RDP options** per connection with per-site defaults: resolution and smart sizing, colour depth,
-  multi-monitor, drives, printers, ports, smart cards, clipboard, audio, Windows keys, visual effects, console
+  multi-monitor, drives, printers, ports, smart cards, clipboard, audio, Windows keys, visual effects, admin
   session, NLA, server authentication level, RD Gateway, load balance info. Plain connections launch with
   `mstsc /v:host`; advanced ones through a generated `.rdp` file (no password inside).
-- **Status**: one TCP check of the selected connection's port. Quaygate never scans or probes all your hosts.
-- **Settings**: text size, themes (Carbon, Graphite, Light, High contrast) and a custom accent colour, site order,
+- **Settings**: themes (Carbon, Graphite, Light, High contrast), accent colour, text size, density, columns,
   language (English, Spanish). Every text/background pair meets WCAG AA contrast.
 - Single small `.exe` for .NET Framework 4.8, which ships with Windows 10 and 11. Nothing to install.
 
-**No telemetry, no analytics, no update checks.** The only network traffic is that single port check and the
-Remote Desktop sessions you open.
+**No telemetry, no analytics, no update checks.** The only network traffic is the port checks described above
+and the Remote Desktop sessions you open.
 
 ## Install
 
-Download `Quaygate.exe` from the [latest release](https://github.com/4leX-42/Quaygate/releases/latest) and run it.
+Download `FastRemote.exe` from the [latest release](https://github.com/4leX-42/FastRemote/releases/latest) and run it.
 Check the SHA-256 against the `.sha256` file of the release.
 
-Data lives in `%APPDATA%\Quaygate\` (`connections.json`, `settings.json`). Generated `.rdp` files go to
-`%LOCALAPPDATA%\Quaygate\rdp\` and are cleaned at startup.
+Data lives in `%APPDATA%\FastRemote\` (`connections.json`, `settings.json`, `history.json`). Generated `.rdp` files
+go to `%LOCALAPPDATA%\FastRemote\rdp\` and are cleaned at startup. Data from earlier versions (Quaygate, RdpDeck)
+is copied over on the first start.
 
 ## Keyboard
 
 | Key | Action |
 |---|---|
-| Enter / Ctrl+Enter / Shift+Enter | connect / console session (`/admin`) / full screen |
-| Ctrl+F, arrows, Esc | search, move, clear |
+| Enter / Ctrl+Enter / Shift+Enter | connect / admin session (`/admin`) / full screen |
+| Ctrl+K, Ctrl+Shift+P | search, command palette |
+| F5 | check all connections now |
 | Ctrl+N, F2, Del | new, edit, delete |
 | Ctrl+D, Ctrl+C | duplicate, copy host |
+| Ctrl+Shift+F | add to or remove from favourites |
 
 ## Saved credentials on a PC outside the domain
 
@@ -64,31 +76,37 @@ Templates > System > Credentials Delegation).
 ## Build
 
 ```powershell
-.\build.ps1                                   # dist\Quaygate.exe
-dotnet test tests\Quaygate.Tests              # unit and rendering tests
-powershell -File tests\Test-QuaygateUi.ps1    # UI Automation on an isolated instance
+.\build.ps1                                     # dist\FastRemote.exe
+dotnet test tests\FastRemote.Tests              # unit, scenario and rendering tests
+powershell -File tests\Test-FastRemoteUi.ps1    # UI Automation on an isolated instance
 ```
 
 Requires the .NET SDK (8 or later). `assets\Make-Logo.ps1` redraws the logo and the icon.
 
 ## License
 
-MIT. Quaygate is not affiliated with mRemoteNG or Microsoft.
+MIT. FastRemote is not affiliated with mRemoteNG or Microsoft.
 
 ---
 
 ## Castellano
 
-Lanzador de Escritorio remoto rápido y minimalista para Windows. Organiza tus conexiones RDP por sedes y abre
-cada una en su propia ventana de `mstsc`.
+Lanzador de Escritorio remoto para Windows. Agrupa tus conexiones RDP por sedes y abre cada una en su propia
+ventana de `mstsc`.
 
-- Barra de sedes que se ordena arrastrando, búsqueda instantánea y atajos de teclado.
+- Menú, barra de herramientas, pestañas de sesión, árbol de sedes con sus servidores, tabla agrupada por sede,
+  panel de detalles y barra de estado.
+- Disponibilidad de cada conexión al arrancar y cada 5 minutos: una conexión TCP al puerto RDP, de una en una y
+  sin enviar credenciales. Se desactiva en *Ajustes > Disponibilidad*.
+- Estado real de cada sesión (conectando, conectada, interrumpida), leído de las ventanas de `mstsc`.
+- Búsqueda con Ctrl+K y paleta de comandos con Ctrl+Shift+P.
+- Credencial por conexión desde el editor: la propia del servidor, la misma que otro servidor o ninguna. Avisa
+  si está compartida. También hay una opción para poner la misma credencial a varias conexiones a la vez.
 - Importa de mRemoteNG las conexiones, las carpetas y, si quieres, las contraseñas, que pasan al Administrador
   de credenciales de Windows.
-- Credencial por conexión o para muchas a la vez.
 - Opciones avanzadas de RDP con valores por defecto por sede.
-- Temas, color de acento y tamaño de letra, en castellano e inglés.
-- Sin telemetría ni comprobación de actualizaciones. Solo comprueba el puerto de la conexión que seleccionas.
+- Temas, color de acento, tamaño de letra y densidad, en castellano e inglés.
+- Sin telemetría ni comprobación de actualizaciones.
 
-Descarga `Quaygate.exe` de la [última versión](https://github.com/4leX-42/Quaygate/releases/latest). Los datos
-se guardan en `%APPDATA%\Quaygate\`.
+Descarga `FastRemote.exe` de la [última versión](https://github.com/4leX-42/FastRemote/releases/latest). Los datos
+se guardan en `%APPDATA%\FastRemote\`.

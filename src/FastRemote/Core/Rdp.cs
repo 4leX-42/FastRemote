@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Quaygate
+namespace FastRemote
 {
     // The same option catalogue drives the editor, XML mapping and file allowlist.
     public sealed class Option

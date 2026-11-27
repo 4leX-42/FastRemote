@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="src/Quaygate/Quaygate.csproj" />
-  <Project Path="tests/Quaygate.Tests/Quaygate.Tests.csproj" />
-</Solution>
