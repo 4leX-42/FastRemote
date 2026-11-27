@@ -14,6 +14,11 @@ RDP launcher for Windows. Every connection in its own mstsc
 
 </div>
 
+For IT support that jumps between many Windows servers across sites. FastRemote keeps your RDP connections
+organised by site, shows which servers answer before you click, and tells you which sessions are open and in
+what state. Each connection opens in the native Remote Desktop client (`mstsc`): no embedded tabs, no agent on
+the servers, nothing to install.
+
 | | |
 |---|---|
 | <img src="https://api.iconify.design/lucide/folder-tree.svg?color=%238b949e" width="18" align="top"> **Sites** | Servers grouped by site · drag to reorder · favourites, recent |
