@@ -88,7 +88,7 @@ namespace FastRemote.Tests
             var settings=new Settings();
             ProcessStartInfo started=null;
             Rdp.Launch(c,settings,directory,false,false,info=>started=info);
-            Equal("/v:desk.invalid",started.Arguments); Equal("mstsc.exe",Path.GetFileName(started.FileName));
+            Equal("/v:desk.invalid",started.Arguments); Equal("mstsc.exe",Path.GetFileName(started.FileName)); Equal(Environment.SystemDirectory,started.WorkingDirectory);
             c.Port=3392; c.Admin=true; c.FullScreen=true;
             Equal("/v:desk.invalid:3392 /admin /f",Rdp.Arguments(c,settings,directory));
             c.Host="::1"; Equal("/v:[::1]:3392 /admin /f",Rdp.Arguments(c,settings,directory,true,true));
