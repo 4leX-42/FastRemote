@@ -118,7 +118,9 @@ namespace FastRemote
         }
         public static void Launch(Connection c,Settings settings,string directory,bool admin,bool full,Action<ProcessStartInfo> start)
         {
-            start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory,"mstsc.exe"),Arguments(c,settings,directory,admin,full)){UseShellExecute=false});
+            start(new ProcessStartInfo(Path.Combine(Environment.SystemDirectory,"mstsc.exe"),Arguments(c,settings,directory,admin,full)){UseShellExecute=false,
+                // mstsc keeps its working folder open: never the folder of FastRemote, so it can be moved or updated
+                WorkingDirectory=Environment.SystemDirectory});
         }
         public static void Clean(string directory)
         {
